@@ -1,36 +1,65 @@
-// Интерфейс для машины
+// Интерфейс
 interface ICar {
-    fuel: string; // Уровень топлива
-    open: boolean; // Состояние дверей
-    freeSeats: number; // Количество свободных мест
-}
-
-// Декоратор для закрытия машины
-@closeCar
-// Класс машины, реализующий интерфейс
-class myCar implements ICar {
-    fuel: string = "50%"; // Начальный уровень топлива
-    open: boolean = true; // Начальное состояние дверей
+    fuel: string;
+    open: boolean;
     freeSeats: number;
+}
+
+// Декоратор для установки состояния дверей (true - открыто, false - закрыто)
+@changeDoorStatus(true)
+@changeAmountOfFuel(95) // Декоратор для установки уровня топлива в процентах
+// Класс машины, реализующий интерфейс ICar
+class myCar implements ICar {
+    fuel: string = "50%"; // Начальный уровень топлива (переопределяется декоратором)
+    open: boolean = true; // Начальное состояние дверей (переопределяется декоратором)
+    freeSeats: number;
+    // Метод для проверки состояния дверей
     isOpen() {
-        console.log(this.fuel);
-        return this.open ? "open" : "close"; // Возврат состояния дверей
+        console.log(this.fuel); // Вывод текущего уровня топлива
+        return this.open ? "open" : "close"; // Возврат состояния дверей ("open" или "close")
     }
 }
 
-// Декоратор для установки состояния дверей в "закрыто" в в виде generic
-function closeCar<
-    T extends {
-        new (...args: any[]): {};
-    }
->(constructor: T) {
-    return class extends constructor {
-        open = false; // Устанавливаем состояние дверей в "закрыто"
+// Декоратор для изменения состояния дверей
+function changeDoorStatus(status: boolean) {
+    console.log("door init"); // Сообщение при инициализации декоратора
+    // Функция-декоратор принимает конструктор класса
+    return <
+        T extends {
+            new (...args: any[]): {};
+        }
+    >(
+        constructor: T
+    ) => {
+        console.log("door changed"); // Сообщение при применении декоратора
+        // Возвращаем новый класс, расширяющий исходный
+        return class extends constructor {
+            open = status; // Устанавливаем новое состояние дверей
+        };
     };
 }
 
-// Создание нового экземпляра класса
+// Декоратор для изменения уровня топлива
+function changeAmountOfFuel(amount: number) {
+    console.log("fuel init"); // Сообщение при инициализации декоратора
+    // Функция-декоратор принимает конструктор класса
+    return <
+        T extends {
+            new (...args: any[]): {};
+        }
+    >(
+        constructor: T
+    ) => {
+        console.log("fuel changed"); // Сообщение при применении декоратора
+        // Возвращаем новый класс, расширяющий исходный
+        return class extends constructor {
+            fuel = `${amount}%`; // Устанавливаем новый уровень топлива
+        };
+    };
+}
+
+// Создание экземпляра класса myCar
 const car = new myCar();
 
-// Вызов метода isOpen
+// Вызов метода isOpen для проверки состояния и вывода результата
 console.log(car.isOpen());
