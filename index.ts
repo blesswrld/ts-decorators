@@ -1,32 +1,36 @@
-// Объект машины с начальными свойствами и методом
-const myCar = {
-    fuel: "50%", // Начальный уровень топлива
-    open: true, // Начальное состояние дверей
-    freeSeats: 3,
-    isOpen() {
-        console.log(this.fuel);
-        return this.open ? "open" : "close";
-    },
-};
+// Интерфейс для машины
+interface ICar {
+    fuel: string; // Уровень топлива
+    open: boolean; // Состояние дверей
+    freeSeats: number; // Количество свободных мест
+}
 
 // Декоратор для закрытия машины
-function closeCar(car: typeof myCar) {
-    car.open = false; // Установка состояния дверей в "закрыто"
-    console.log("close car");
-    return car; // Возврат измененного объекта
+@closeCar
+// Класс машины, реализующий интерфейс
+class myCar implements ICar {
+    fuel: string = "50%"; // Начальный уровень топлива
+    open: boolean = true; // Начальное состояние дверей
+    freeSeats: number;
+    isOpen() {
+        console.log(this.fuel);
+        return this.open ? "open" : "close"; // Возврат состояния дверей
+    }
 }
 
-// Декоратор для заправки машины
-function addFuel(car: typeof myCar) {
-    car.fuel = "100%"; // Установка полного уровня топлива
-    console.log("add fuel");
-    return car; // Возврат измененного объекта
+// Декоратор для установки состояния дверей в "закрыто" в в виде generic
+function closeCar<
+    T extends {
+        new (...args: any[]): {};
+    }
+>(constructor: T) {
+    return class extends constructor {
+        open = false; // Устанавливаем состояние дверей в "закрыто"
+    };
 }
 
-// Выполнение декораторов и вызов метода isOpen
-// Композиция: addFuel(closeCar(myCar)).isOpen()
-addFuel(closeCar(myCar)).isOpen();
+// Создание нового экземпляра класса
+const car = new myCar();
 
-// Композиция
-// Функция внутри - Функции
-// f(x(y()));
+// Вызов метода isOpen
+console.log(car.isOpen());
